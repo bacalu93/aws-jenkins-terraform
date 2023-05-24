@@ -1,11 +1,33 @@
-provider "aws" {
-    region = "us-east-1"  
-}
-
-resource "aws_instance" "foo" {
-  ami           = "ami-05fa00d4c63e32376" # us-west-2
-  instance_type = "t2.micro"
-  tags = {
-      Name = "TF-Instance"
+variable "users" {
+  default = {
+    Andrei : { country : "Madeira", department : "AWS" },
+    Tom : { country : "US", department : "ABC" },
+    Nicoleta : { country : "Germany", department : "DCE" }
   }
 }
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.0"
+    }
+  }
+}
+
+# Configure the AWS Provider
+provider "aws" {
+  region = "us-east-1"
+  # VERSION IS NOT NEEDED HERE
+}
+
+resource "aws_iam_user" "my_iam_users" {
+  for_each = var.users
+  name     = each.key
+  tags = {
+    country : each.value.country
+    department : each.value.department
+  }
+
+
+}
+
